@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es6", 
+    "module": "commonjs",
+    "outDir": "./dist",
+    "removeComments": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "exclude": ["node_modules", "__tests__/*.spec.ts"]
+}
