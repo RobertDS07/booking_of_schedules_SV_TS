@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 
 import { quemQuando } from './quemQuando'
+import { IProdutos } from './FlaFlu'
 
 const Schema = new mongoose.Schema({
     dia: {
@@ -57,4 +58,4 @@ const Schema = new mongoose.Schema({
     }
 })
 
-export const FlaFlu = mongoose.model('FlaFlu', Schema)
+export const PingPong = mongoose.model<IProdutos>('PingPong', Schema)

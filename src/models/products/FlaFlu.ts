@@ -2,6 +2,16 @@ import mongoose from 'mongoose'
 
 import { quemQuando } from './quemQuando'
 
+export interface IProdutos extends mongoose.Document  {
+    quemQuando?: {
+        hora: string
+        disponivel: boolean
+        whatsapp: number
+    }[]
+    dia: string
+    produto?: string
+}
+
 const Schema = new mongoose.Schema({
     dia: {
         type: String,
@@ -57,4 +67,4 @@ const Schema = new mongoose.Schema({
     }
 })
 
-export const PingPong = mongoose.model('PingPong', Schema)
+export const FlaFlu = mongoose.model<IProdutos>('FlaFlu', Schema)

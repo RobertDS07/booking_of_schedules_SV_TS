@@ -1,7 +1,6 @@
 import mongoose from 'mongoose'
 import bcrypt from 'bcryptjs'
 
-
 const Schema = new mongoose.Schema({
     nome: {
         type: String,
@@ -34,4 +33,4 @@ Schema.pre<user>('save', async function() {
     this.senha = await bcrypt.hash(this.senha, 10)
 })
 
-export const User = mongoose.model('users', Schema) 
+export const User = mongoose.model<user>('users', Schema) 

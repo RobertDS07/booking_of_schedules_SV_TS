@@ -12,4 +12,4 @@ export const quemQuando = new mongoose.Schema({
     whatsapp: {
         type: Number
     },
-}, {_id: false})
+}, { _id: false })
