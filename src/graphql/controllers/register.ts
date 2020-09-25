@@ -1,4 +1,5 @@
 import {User} from '../../models/User'
+import createToken from './CreateJwt'
 
 export interface Iregister {
     nome:string
@@ -17,8 +18,7 @@ export const registerController = async ({senha, nome, casa, whatsapp}:Iregister
     
     const user = await User.create({senha, nome, casa, whatsapp})
 
-    // usar jwt
-    const token = '123456'
+    const token = createToken(user)
 
     return token
 }

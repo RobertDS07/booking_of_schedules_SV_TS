@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs'
+import createToken from './CreateJwt'
 
 import {User} from '../../models/User'
 import {Iregister} from './register'
@@ -10,7 +11,7 @@ export const loginController = async({whatsapp, senha}: Tlogin) => {
 
     if (!user || ! await bcrypt.compare(senha, user.senha)) return new Error('Credenciais invalidas')
 
-    const token = '123456'
+    const token = createToken(user)
 
     return token
 }

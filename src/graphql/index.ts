@@ -1,4 +1,5 @@
 import { buildSchema } from 'graphql'
+import jwt from 'jsonwebtoken'
 
 import { Iregister, registerController } from './controllers/register'
 import { Tlogin, loginController } from './controllers/login'
@@ -7,11 +8,12 @@ import { IMarkHour, markHourController } from './controllers/markHourController'
 
 export const schema = buildSchema(`
     type Query {
-        register(nome:String!, whatsapp:Int!, casa:Int!, senha:String!): String
+        login(whatsapp:Int!, senha:String!): String
+        checkToken(token: String): Boolean
     }
 
     type Mutation {
-        login(whatsapp:Int!, senha:String!): String
+        register(nome:String!, whatsapp:Int!, casa:Int!, senha:String!): String
         checkTimes(produto:String!, dia:String!): [String]
     }
 `)
@@ -24,6 +26,15 @@ export const resolvers = {
     },
     login: async (args: Tlogin) => {
         const response = await loginController(args)
+
+        return response
+    },
+    checkToken: ({token}: {token:string}) => {
+        const response = jwt.verify(token, process.env.SECRET || 'hjasdhf873fb312', (err) => {
+            if (err) return false
+
+            return true
+        })
 
         return response
     },

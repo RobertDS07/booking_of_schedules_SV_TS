@@ -2,7 +2,6 @@ import jwt from 'jsonwebtoken'
 import { FlaFlu } from '../../models/products/FlaFlu'
 import { PingPong } from '../../models/products/PingPong'
 
-
 export interface IMarkHour {
     produto:string
     horario: string

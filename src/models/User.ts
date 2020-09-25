@@ -22,7 +22,7 @@ const Schema = new mongoose.Schema({
     }
 })
 
-interface user extends mongoose.Document {
+export interface user extends mongoose.Document {
     nome:string
     casa:number
     whatsapp:number
