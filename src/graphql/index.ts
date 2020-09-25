@@ -15,6 +15,7 @@ export const schema = buildSchema(`
     type Mutation {
         register(nome:String!, whatsapp:Int!, casa:Int!, senha:String!): String
         checkTimes(produto:String!, dia:String!): [String]
+        markHour(produto:String!, horario:String!, token:String!, dia:String!): String
     }
 `)
 

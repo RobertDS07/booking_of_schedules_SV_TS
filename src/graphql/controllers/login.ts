@@ -11,6 +11,8 @@ export const loginController = async({whatsapp, senha}: Tlogin) => {
 
     if (!user || ! await bcrypt.compare(senha, user.senha)) return new Error('Credenciais invalidas')
 
+    user.senha = 'undefined'
+
     const token = createToken(user)
 
     return token

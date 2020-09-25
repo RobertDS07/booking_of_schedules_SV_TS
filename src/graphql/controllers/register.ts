@@ -1,4 +1,4 @@
-import {User} from '../../models/User'
+import { User } from '../../models/User'
 import createToken from './CreateJwt'
 
 export interface Iregister {
@@ -17,6 +17,8 @@ export const registerController = async ({senha, nome, casa, whatsapp}:Iregister
     if (!!alredyInUse) return new Error('Whatsapp já cadastrado')
     
     const user = await User.create({senha, nome, casa, whatsapp})
+
+    user.senha = 'undefined'
 
     const token = createToken(user)
 
