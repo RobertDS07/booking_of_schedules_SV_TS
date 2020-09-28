@@ -1,25 +1,26 @@
 import { buildSchema } from 'graphql'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
+import nodemailer from 'nodemailer'
 
 import { FlaFlu } from '../models/products/FlaFlu'
 import { PingPong } from '../models/products/PingPong'
-import { User } from '../models/User'
+import { user, User } from '../models/User'
 
 import createToken from './utils/CreateJwt'
-import { Iregister, Tlogin, TcheckTimes, IMarkHour } from './types/types'
+import { Iregister, Tlogin, TcheckTimes, IMarkHour, forgetPassword } from './types/types'
 
 export const schema = buildSchema(`
     type Query {
         login(whatsapp:Int!, senha:String!): String
         checkToken(token: String): Boolean
         checkTimes(produto:String!, dia:String!): [Hours]
-        forgetPassword(whatsapp:String!): User
     }
 
     type Mutation {
-        register(nome:String!, whatsapp:Int!, casa:Int!, senha:String!): String
+        register(nome:String!, whatsapp:Int!, casa:Int!, senha:String!, email: String!): String
         markHour(produto:String!, horario:String!, token:String!, dia:String!): String
+        forgetPassword(email:String!): Boolean
     }
 
     type Hours{
@@ -29,23 +30,23 @@ export const schema = buildSchema(`
     type User {
         key: String
     }
-
 `)
 
 export const resolvers = {
-    register: async ({ whatsapp, casa, nome, senha }: Iregister) => {
+    register: async ({ whatsapp, casa, nome, senha, email }: Iregister) => {
         if (senha.length < 5) return new Error('Senha deve conter 5 caracteres ou mais')
         if (casa > 625) return new Error('Casa inválida...')
 
-        const alredyInUse = await User.findOne({ whatsapp })
+        const alredyInUseWpp = await User.findOne({ whatsapp })
+        const alredyInUseEmail = await User.findOne({ email })
 
-        if (!!alredyInUse) return new Error('Whatsapp já cadastrado')
+        if (!!alredyInUseWpp || !!alredyInUseEmail) return new Error('Email ou Whatsapp já em uso')
 
-        const user = await User.create({ senha, nome, casa, whatsapp })
+        const user = await User.create({ senha, nome, casa, whatsapp, email })
 
         user.senha = 'undefined'
 
-        const token = createToken(user)
+        const token = createToken<user>(user, '365d')
 
         return token
     },
@@ -56,12 +57,40 @@ export const resolvers = {
 
         user.senha = 'undefined'
 
-        const token = createToken(user)
+        const token = createToken<user>(user, '365d')
 
         return token
     },
-    forgetPassword: async ({ whatsapp }: forgetPassword) => {
+    forgetPassword: async ({ email }: forgetPassword) => {
+        try {
+            const user = await User.findOne({ email })
 
+            if (!user) throw new Error('Usuario não encontrado...')
+
+            const codeToVerify = Math.floor((Math.random() * 999) + 100)
+
+            const token = createToken<number>(codeToVerify, '1d')
+
+            await user.updateOne({ key: token })
+
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: 'testeteste1132@gmail.com',
+                    pass: 'teste123teste'
+                }
+            })
+
+            await transporter.sendMail({
+                from: 'testeteste1132@gmail.com',
+                to: `${email}`,
+                subject: 'subject',
+                text: `${codeToVerify}`,
+            })
+        } catch(e) {
+            return e
+        }
+        return true
     },
     checkToken: ({ token }: { token: string }) => {
         const response = jwt.verify(token, process.env.SECRET || 'hjasdhf873fb312', (err) => {
