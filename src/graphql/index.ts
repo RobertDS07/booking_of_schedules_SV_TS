@@ -13,7 +13,8 @@ export const schema = buildSchema(`
     type Query {
         login(whatsapp:Int!, senha:String!): String
         checkToken(token: String): Boolean
-        checkTimes(produto:String!, dia:String!): [hours]
+        checkTimes(produto:String!, dia:String!): [Hours]
+        forgetPassword(whatsapp:String!): User
     }
 
     type Mutation {
@@ -21,8 +22,12 @@ export const schema = buildSchema(`
         markHour(produto:String!, horario:String!, token:String!, dia:String!): String
     }
 
-    type hours{
+    type Hours{
         hora: String
+    }
+
+    type User {
+        key: String
     }
 
 `)
@@ -54,6 +59,9 @@ export const resolvers = {
         const token = createToken(user)
 
         return token
+    },
+    forgetPassword: async ({ whatsapp }: forgetPassword) => {
+
     },
     checkToken: ({ token }: { token: string }) => {
         const response = jwt.verify(token, process.env.SECRET || 'hjasdhf873fb312', (err) => {

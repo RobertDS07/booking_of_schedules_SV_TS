@@ -19,6 +19,9 @@ const Schema = new mongoose.Schema({
         type: String,
         required: true,
         select: false,
+    },
+    key: {
+        type: String
     }
 })
 
@@ -27,6 +30,7 @@ export interface user extends mongoose.Document {
     casa:number
     whatsapp:number
     senha:string
+    key?: string
 }
 
 Schema.pre<user>('save', async function() {
