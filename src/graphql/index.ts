@@ -8,7 +8,7 @@ import { PingPong } from '../models/products/PingPong'
 import { user, User } from '../models/User'
 
 import createToken from './utils/CreateJwt'
-import { Iregister, Tlogin, TcheckTimes, IMarkHour, forgetPassword } from './types/types'
+import { Iregister, Tlogin, TcheckTimes, IMarkHour, forgetPassword, changePassword } from './types/types'
 
 export const schema = buildSchema(`
     type Query {
@@ -21,6 +21,8 @@ export const schema = buildSchema(`
         register(nome:String!, whatsapp:Int!, casa:Int!, senha:String!, email: String!): String
         markHour(produto:String!, horario:String!, token:String!, dia:String!): String
         forgetPassword(email:String!): Boolean
+        verifyCodePassword(key: String!, email: String!): Boolean
+        changePassword(password: String!, email: String!): Boolean
     }
 
     type Hours{
@@ -42,7 +44,7 @@ export const resolvers = {
 
         if (!!alredyInUseWpp || !!alredyInUseEmail) return new Error('Email ou Whatsapp já em uso')
 
-        const user = await User.create({ senha, nome, casa, whatsapp, email })
+        const user = await User.create<Omit<user, 'key'>>({ senha, nome, casa, whatsapp, email })
 
         user.senha = 'undefined'
 
@@ -87,10 +89,55 @@ export const resolvers = {
                 subject: 'subject',
                 text: `${codeToVerify}`,
             })
-        } catch(e) {
+        } catch (e) {
             return e
         }
         return true
+    },
+    verifyCodePassword: async ({ email, key }: forgetPassword) => {
+        try {
+            const user = await User.findOne({ email })
+
+            if (!user) throw new Error('Houve algo de errado tente novamente...')
+
+            let code:any
+
+            jwt.verify(user.key, process.env.SECRET || 'hjasdhf873fb312', (err, decoded) => {
+                if (err) throw new Error('Peça outro código')
+
+                if(!!decoded) code = decoded
+            })
+
+            if (Number(key) !== code.user) return false
+
+            await user.updateOne({key: 'ready to change'})
+
+            return true
+
+        } catch (e) {
+            return e
+        }
+    },
+    changePassword: async ({ email, password }: changePassword) => {
+        try{
+            if( password.length < 5) throw new Error('Senha deve ter 5 caracteres ou mais')            
+
+            const user = await User.findOne({ email })
+
+            if (!user) throw new Error('Houve algo de errado, Tente novamente mais tarde...')
+
+            if(user.key !== 'ready to change') throw new Error('Houve algo de errado, Tente novamente mais tarde...')
+
+            const newPassword = await bcrypt.hash(password, 10)
+
+            const changedPassword = await user.updateOne({ senha: newPassword, key:undefined})
+
+            if (!changedPassword) throw new Error('Houve algo de errado... Tente novamente')
+
+            return true
+        } catch(e) {
+            return e
+        }
     },
     checkToken: ({ token }: { token: string }) => {
         const response = jwt.verify(token, process.env.SECRET || 'hjasdhf873fb312', (err) => {

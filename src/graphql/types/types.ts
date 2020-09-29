@@ -2,7 +2,14 @@ import { IProdutos } from '../../models/products/FlaFlu'
 
 export type Tlogin = Pick<Iregister, 'senha' | 'whatsapp'>
 export type TcheckTimes = Pick<IProdutos, 'produto' | 'dia'>
-export type forgetPassword = Pick<Iregister, 'email'>
+export interface forgetPassword {
+    email: string
+    key: string
+}
+export interface changePassword {
+    email: string
+    password: string
+}
 
 export interface Iregister {
     nome: string

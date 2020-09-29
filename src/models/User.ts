@@ -36,7 +36,7 @@ export interface user extends mongoose.Document {
     whatsapp: number
     senha: string
     email: string
-    key?: string
+    key: string
 }
 
 Schema.pre<user>('save', async function () {
