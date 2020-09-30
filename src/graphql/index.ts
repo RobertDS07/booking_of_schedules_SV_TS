@@ -89,10 +89,11 @@ export const resolvers = {
                 subject: 'subject',
                 text: `${codeToVerify}`,
             })
+
+            return true
         } catch (e) {
             return e
         }
-        return true
     },
     verifyCodePassword: async ({ email, key }: forgetPassword) => {
         try {
@@ -110,7 +111,9 @@ export const resolvers = {
 
             if (Number(key) !== code.user) return false
 
-            await user.updateOne({key: 'ready to change'})
+            const jwtKey = createToken<string>('ready to change', '10m')
+
+            await user.updateOne({key: jwtKey})
 
             return true
 
@@ -126,7 +129,15 @@ export const resolvers = {
 
             if (!user) throw new Error('Houve algo de errado, Tente novamente mais tarde...')
 
-            if(user.key !== 'ready to change') throw new Error('Houve algo de errado, Tente novamente mais tarde...')
+            let key:any
+
+            jwt.verify(user.key, process.env.SECRET || 'hjasdhf873fb312', (err, decoded) => {
+                if (err) throw new Error('Peça outro código')
+
+                if(!!decoded) key = decoded
+            })
+
+            if(key.user !== 'ready to change') throw new Error('Houve algo de errado, Tente novamente mais tarde...')
 
             const newPassword = await bcrypt.hash(password, 10)
 
